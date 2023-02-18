@@ -1,5 +1,13 @@
 import { Table } from '@mantine/core';
 import { Duration } from '../lib/duration';
+import { formatToken, formatUSD } from '../lib/currency';
+import { shortenAddress } from '../lib/address';
+import { useLazyQuery } from '@apollo/client';
+import { SwapsDocument, SwapsQuery } from '../graphql/queries/swaps.graphql.interface';
+import { useEffect, useMemo, useState } from 'react';
+
+//TODO env
+const PAGE_SIZE: number = 20;
 
 interface Row {
     transactionId: string;
@@ -13,18 +21,15 @@ interface Row {
     timestamp: Date;
 }
 
-// TODO write gql query and use, including choosing the query type
-// TODO paginated query
-const data: Row[] = [
-    { transactionId: "0", token0Symbol: "RUM", token1Symbol: "GUN", token0Amount: 5, token1Amount: 6, valueUSD: 35, sender: "0xlakjsldkj", recipient: "0xlakjsldkj", timestamp: new Date(new Date().getTime() - Duration.ofMilliseconds(30).asMilliseconds()) },
-    { transactionId: "1", token0Symbol: "GEM", token1Symbol: "RUBY", token0Amount: 51, token1Amount: 61, valueUSD: 351, sender: "0xlakcjsldkj", recipient: "0xlaakjdlkdj", timestamp: new Date(new Date().getTime() - Duration.ofSeconds(30).asMilliseconds()) },
-    { transactionId: "2", token0Symbol: "LAVA", token1Symbol: "GUAVA", token0Amount: 52, token1Amount: 62, valueUSD: 352, sender: "0xlakj3sldkj", recipient: "0xlakjd3lkdj", timestamp: new Date(new Date().getTime() - Duration.ofMinutes(30).asMilliseconds()) },
-    { transactionId: "3", token0Symbol: "LEMON", token1Symbol: "DEMON", token0Amount: 54, token1Amount: 64, valueUSD: 354, sender: "0xlakjsl5dkj", recipient: "0xl5akjdlkdj", timestamp: new Date(new Date().getTime() - Duration.ofDays(30).asMilliseconds()) }
-];
-
 // TODO column-sorted table https://ui.mantine.dev/component/table-sort
+//TODO hover address to see full
+//TODO pagination
+//TODO loading state
+//TODO errors
 
 export function Swaps() {
+    const swapsContext = useRecentSwaps();
+
     return (
         <Table>
             <thead>
@@ -37,16 +42,16 @@ export function Swaps() {
                     <th>When</th>
                 </tr>
             </thead>
-            <tbody>{data.map(row => (
+            <tbody>{swapsContext.data?.map(row => (
                 <tr key={row.transactionId}>
                     <td>{`${row.token0Symbol} ↔ ${row.token1Symbol}`}</td>
-                    <td>{row.valueUSD.toFixed(2)}</td>
-                    <td>{`${row.token0Amount} ${row.token0Symbol}`}</td>
-                    <td>{`${row.token1Amount} ${row.token1Symbol}`}</td>
+                    <td>{formatUSD(row.valueUSD)}</td>
+                    <td>{`${formatToken(row.token0Amount)} ${row.token0Symbol}`}</td>
+                    <td>{`${formatToken(row.token1Amount)} ${row.token1Symbol}`}</td>
                     <td>{
                         (row.sender === row.recipient) ?
-                            row.sender :
-                            `${row.sender} > ${row.recipient}`
+                            shortenAddress(row.sender) :
+                            `${shortenAddress(row.sender)} ➝ ${shortenAddress(row.recipient)}`
                     }</td>
                     <td>{timestampToElapsedString(row.timestamp)}</td>
                 </tr>
@@ -74,4 +79,55 @@ function timestampToElapsedString(timestamp: Date): string {
     } else {
         return `just now`
     }
+}
+
+
+interface UseRecentSwapsContext {
+    data: Row[] | undefined;
+    loading: boolean;
+    error: Error | undefined;
+    refresh: () => void;
+    setPage: (page: number) => void;
+}
+
+
+function useRecentSwaps(): UseRecentSwapsContext {
+    const [page, setPage] = useState<number>(0);
+    const [query, context] = useLazyQuery(SwapsDocument, {
+        variables: {
+            first: PAGE_SIZE,
+        }
+    });
+
+    // initial load and page change
+    useEffect(() => {
+        query({ variables: { skip: PAGE_SIZE * page } });
+    }, [page]);
+
+    const data: UseRecentSwapsContext["data"] = useMemo(() => transformQueryResults(context.data), [context.data]);
+
+    return {
+        loading: context.loading,
+        error: context.error,
+        data: data,
+        refresh: context.refetch,
+        setPage: setPage
+    }
+}
+
+
+function transformQueryResults(data: SwapsQuery): Row[] | undefined {
+    if (data === undefined) return undefined;
+    return data.swaps.map(swap => ({
+        transactionId: swap.id,
+        token0Symbol: swap.token0.symbol,
+        token1Symbol: swap.token1.symbol,
+        token0Amount: Number.parseFloat(swap.amount0),
+        token1Amount: Number.parseFloat(swap.amount1),
+        valueUSD: Number.parseFloat(swap.amountUSD),
+        sender: swap.sender,
+        recipient: swap.recipient,
+        // timestamps are in seconds since epoch
+        timestamp: new Date(Number.parseInt(swap.timestamp) * 1000)
+    }));
 }
