@@ -1,5 +1,4 @@
 import { NextPage } from 'next';
-import Link from 'next/link';
 import { useApolloClient } from '@apollo/client';
 import { Demo } from '../components/Table';
 
