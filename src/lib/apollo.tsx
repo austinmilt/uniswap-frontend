@@ -1,8 +1,6 @@
 import { useMemo } from 'react';
 import merge from 'deepmerge';
-import cookie from 'cookie';
 import type { GetServerSidePropsContext } from 'next';
-import type { IncomingMessage } from 'http';
 import type { NormalizedCacheObject } from '@apollo/client';
 import { ApolloClient, HttpLink, InMemoryCache } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
@@ -15,14 +13,6 @@ interface PageProps {
 export const APOLLO_STATE_PROPERTY_NAME = '__APOLLO_STATE__';
 export const COOKIES_TOKEN_NAME = 'jwt';
 
-const getToken = (req?: IncomingMessage) => {
-  const parsedCookie = cookie.parse(
-    req ? req.headers.cookie ?? '' : document.cookie,
-  );
-
-  return parsedCookie[COOKIES_TOKEN_NAME];
-};
-
 let apolloClient: ApolloClient<NormalizedCacheObject> = null;
 
 const createApolloClient = (ctx?: GetServerSidePropsContext) => {
@@ -32,14 +22,9 @@ const createApolloClient = (ctx?: GetServerSidePropsContext) => {
   });
 
   const authLink = setContext((_, { headers }) => {
-    // Get the authentication token from cookies
-    const token = getToken(ctx?.req);
 
     return {
-      headers: {
-        ...headers,
-        authorization: token ? `Bearer ${token}` : '',
-      },
+      headers: headers,
     };
   });
 
