@@ -1,10 +1,11 @@
-import { Table } from '@mantine/core';
+import { Pagination, Table } from '@mantine/core';
 import { Duration } from '../lib/duration';
 import { formatToken, formatUSD } from '../lib/currency';
 import { shortenAddress } from '../lib/address';
 import { useLazyQuery } from '@apollo/client';
 import { SwapsDocument, SwapsQuery } from '../graphql/queries/swaps.graphql.interface';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
+import { PaginationContext, usePagination } from '../lib/usePagination';
 
 //TODO env
 const PAGE_SIZE: number = 20;
@@ -23,40 +24,47 @@ interface Row {
 
 // TODO column-sorted table https://ui.mantine.dev/component/table-sort
 //TODO hover address to see full
-//TODO pagination
 //TODO loading state
 //TODO errors
 
 export function Swaps() {
-    const swapsContext = useRecentSwaps();
+    const pagination = usePagination();
+    const swapsContext = useRecentSwaps(pagination);
 
     return (
-        <Table>
-            <thead>
-                <tr>
-                    <th>Swap</th>
-                    <th>Value (USD)</th>
-                    <th>Token Amount</th>
-                    <th>Token Amount</th>
-                    <th>Account(s)</th>
-                    <th>When</th>
-                </tr>
-            </thead>
-            <tbody>{swapsContext.data?.map(row => (
-                <tr key={row.transactionId}>
-                    <td>{`${row.token0Symbol} ↔ ${row.token1Symbol}`}</td>
-                    <td>{formatUSD(row.valueUSD)}</td>
-                    <td>{`${formatToken(row.token0Amount)} ${row.token0Symbol}`}</td>
-                    <td>{`${formatToken(row.token1Amount)} ${row.token1Symbol}`}</td>
-                    <td>{
-                        (row.sender === row.recipient) ?
-                            shortenAddress(row.sender) :
-                            `${shortenAddress(row.sender)} ➝ ${shortenAddress(row.recipient)}`
-                    }</td>
-                    <td>{timestampToElapsedString(row.timestamp)}</td>
-                </tr>
-            ))}</tbody>
-        </Table>
+        <>
+            <Table>
+                <thead>
+                    <tr>
+                        <th>Swap</th>
+                        <th>Value (USD)</th>
+                        <th>Token Amount</th>
+                        <th>Token Amount</th>
+                        <th>Account(s)</th>
+                        <th>When</th>
+                    </tr>
+                </thead>
+                <tbody>{swapsContext.data?.map(row => (
+                    <tr key={row.transactionId}>
+                        <td>{`${row.token0Symbol} ↔ ${row.token1Symbol}`}</td>
+                        <td>{formatUSD(row.valueUSD)}</td>
+                        <td>{`${formatToken(row.token0Amount)} ${row.token0Symbol}`}</td>
+                        <td>{`${formatToken(row.token1Amount)} ${row.token1Symbol}`}</td>
+                        <td>{
+                            (row.sender === row.recipient) ?
+                                shortenAddress(row.sender) :
+                                `${shortenAddress(row.sender)} ➝ ${shortenAddress(row.recipient)}`
+                        }</td>
+                        <td>{timestampToElapsedString(row.timestamp)}</td>
+                    </tr>
+                ))}</tbody>
+            </Table>
+            <Pagination
+                page={pagination.page}
+                onChange={pagination.set}
+                total={pagination.maxPage + 1}
+            />
+        </>
     );
 }
 
@@ -87,12 +95,10 @@ interface UseRecentSwapsContext {
     loading: boolean;
     error: Error | undefined;
     refresh: () => void;
-    setPage: (page: number) => void;
 }
 
 
-function useRecentSwaps(): UseRecentSwapsContext {
-    const [page, setPage] = useState<number>(0);
+function useRecentSwaps(pagination: PaginationContext): UseRecentSwapsContext {
     const [query, context] = useLazyQuery(SwapsDocument, {
         variables: {
             first: PAGE_SIZE,
@@ -101,8 +107,8 @@ function useRecentSwaps(): UseRecentSwapsContext {
 
     // initial load and page change
     useEffect(() => {
-        query({ variables: { skip: PAGE_SIZE * page } });
-    }, [page]);
+        query({ variables: { skip: PAGE_SIZE * pagination.index } });
+    }, [pagination.index]);
 
     const data: UseRecentSwapsContext["data"] = useMemo(() => transformQueryResults(context.data), [context.data]);
 
@@ -111,7 +117,6 @@ function useRecentSwaps(): UseRecentSwapsContext {
         error: context.error,
         data: data,
         refresh: context.refetch,
-        setPage: setPage
     }
 }
 

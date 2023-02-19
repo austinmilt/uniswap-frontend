@@ -1,8 +1,9 @@
-import { Table } from '@mantine/core';
-import { useEffect, useMemo, useState } from 'react';
+import { Pagination, Table } from '@mantine/core';
+import { useEffect, useMemo } from 'react';
 import { formatUSD } from '../lib/currency';
 import { useLazyQuery } from '@apollo/client';
 import { TokensDocument, TokensQuery } from '../graphql/queries/tokens.graphql.interface';
+import { PaginationContext, usePagination } from '../lib/usePagination';
 
 //TODO env
 const PAGE_SIZE: number = 20;
@@ -18,30 +19,37 @@ interface Row {
 // TODO column-sorted table https://ui.mantine.dev/component/table-sort
 // TODO loading
 // TODO error state
-// TODO pagination
 
 export function Tokens() {
-    const topTokensContext = useTopTokens();
+    const pagination = usePagination();
+    const topTokensContext = useTopTokens(pagination);
 
     return (
-        <Table>
-            <thead>
-                <tr>
-                    <th>Token</th>
-                    <th>TVL</th>
-                    <th>Price (USD)</th>
-                    <th>Change (USD, 24hr)</th>
-                </tr>
-            </thead>
-            <tbody>{topTokensContext.data?.map((row, i) => (
-                <tr key={`${row.symbol}-${row.name}-${i}`}>
-                    <td>{`${row.name} (${row.symbol})`}</td>
-                    <td>{formatUSD(row.totalValueLockedUSD)}</td>
-                    <td>{formatUSD(row.priceUSD)}</td>
-                    <td><PriceDelta changeUSD={row.priceUSDChange24Hr} /></td>
-                </tr>
-            ))}</tbody>
-        </Table>
+        <>
+            <Table>
+                <thead>
+                    <tr>
+                        <th>Token</th>
+                        <th>TVL</th>
+                        <th>Price (USD)</th>
+                        <th>Δ Price (USD, 24hr)</th>
+                    </tr>
+                </thead>
+                <tbody>{topTokensContext.data?.map((row, i) => (
+                    <tr key={`${row.symbol}-${row.name}-${i}`}>
+                        <td>{`${row.name} (${row.symbol})`}</td>
+                        <td>{formatUSD(row.totalValueLockedUSD)}</td>
+                        <td>{formatUSD(row.priceUSD)}</td>
+                        <td><PriceDelta changeUSD={row.priceUSDChange24Hr} /></td>
+                    </tr>
+                ))}</tbody>
+            </Table>
+            <Pagination
+                page={pagination.page}
+                onChange={pagination.set}
+                total={pagination.maxPage + 1}
+            />
+        </>
     );
 }
 
@@ -66,12 +74,10 @@ interface UseRecentTokensContext {
     loading: boolean;
     error: Error | undefined;
     refresh: () => void;
-    setPage: (page: number) => void;
 }
 
 
-function useTopTokens(): UseRecentTokensContext {
-    const [page, setPage] = useState<number>(0);
+function useTopTokens(pagination: PaginationContext): UseRecentTokensContext {
     const [query, context] = useLazyQuery(TokensDocument, {
         variables: {
             first: PAGE_SIZE,
@@ -80,8 +86,8 @@ function useTopTokens(): UseRecentTokensContext {
 
     // initial load and page change
     useEffect(() => {
-        query({ variables: { skip: PAGE_SIZE * page } });
-    }, [page]);
+        query({ variables: { skip: PAGE_SIZE * pagination.index } });
+    }, [pagination.index]);
 
     const data: UseRecentTokensContext["data"] = useMemo(() => transformQueryResults(context.data), [context.data]);
 
@@ -90,7 +96,6 @@ function useTopTokens(): UseRecentTokensContext {
         error: context.error,
         data: data,
         refresh: context.refetch,
-        setPage: setPage
     }
 }
 
