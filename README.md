@@ -1,3 +1,13 @@
+# Uniswap Frontend (Coding Challenge)
+## TODO (README)
+- set up (yarn install)
+- running (yarn dev vs docker, see below)
+- contributing
+  > branches
+  > PRs
+  > tests
+- deploying (merge to main, vercel, dev branch),
+
 <h1 align="center">
 next-advanced-apollo-starter
 </h1>

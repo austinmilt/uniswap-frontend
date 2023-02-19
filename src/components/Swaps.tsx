@@ -24,8 +24,8 @@ interface Row {
 }
 
 // TODO column-sorted table https://ui.mantine.dev/component/table-sort
-//TODO hover address to see full
-//TODO errors
+// TODO hover address to see full
+// TODO linked to transaction explorer
 
 export function Swaps() {
     const pagination = usePagination();

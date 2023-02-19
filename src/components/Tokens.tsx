@@ -19,7 +19,6 @@ interface Row {
 }
 
 // TODO column-sorted table https://ui.mantine.dev/component/table-sort
-// TODO error state
 
 export function Tokens() {
     const pagination = usePagination();
