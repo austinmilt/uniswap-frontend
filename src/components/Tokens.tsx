@@ -1,9 +1,11 @@
-import { Pagination, Table } from '@mantine/core';
+import { Loader, Pagination, Table } from '@mantine/core';
 import { useEffect, useMemo } from 'react';
 import { formatUSD } from '../lib/currency';
 import { useLazyQuery } from '@apollo/client';
 import { TokensDocument, TokensQuery } from '../graphql/queries/tokens.graphql.interface';
 import { PaginationContext, usePagination } from '../lib/usePagination';
+import { showNotification } from '@mantine/notifications';
+import { notifyError } from '../lib/notifications';
 
 //TODO env
 const PAGE_SIZE: number = 20;
@@ -17,12 +19,21 @@ interface Row {
 }
 
 // TODO column-sorted table https://ui.mantine.dev/component/table-sort
-// TODO loading
 // TODO error state
 
 export function Tokens() {
     const pagination = usePagination();
     const topTokensContext = useTopTokens(pagination);
+
+    useEffect(() => {
+        if (topTokensContext.error !== undefined) {
+            notifyError(
+                "Tokens Issue",
+                "We're having trouble loading top tokens. Please refresh in a minute.",
+                topTokensContext.error
+            );
+        }
+    }, [topTokensContext.error]);
 
     return (
         <>
@@ -42,7 +53,7 @@ export function Tokens() {
                         <td>{formatUSD(row.priceUSD)}</td>
                         <td><PriceDelta changeUSD={row.priceUSDChange24Hr} /></td>
                     </tr>
-                ))}</tbody>
+                )) ?? <Loader />}</tbody>
             </Table>
             <Pagination
                 page={pagination.page}
@@ -93,7 +104,8 @@ function useTopTokens(pagination: PaginationContext): UseRecentTokensContext {
 
     return {
         loading: context.loading,
-        error: context.error,
+        error: new Error("fuck"),
+        // error: context.error,
         data: data,
         refresh: context.refetch,
     }

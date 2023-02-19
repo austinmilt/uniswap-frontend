@@ -1,4 +1,4 @@
-import { Pagination, Table } from '@mantine/core';
+import { Loader, Pagination, Table } from '@mantine/core';
 import { Duration } from '../lib/duration';
 import { formatToken, formatUSD } from '../lib/currency';
 import { shortenAddress } from '../lib/address';
@@ -6,6 +6,7 @@ import { useLazyQuery } from '@apollo/client';
 import { SwapsDocument, SwapsQuery } from '../graphql/queries/swaps.graphql.interface';
 import { useEffect, useMemo } from 'react';
 import { PaginationContext, usePagination } from '../lib/usePagination';
+import { notifyError } from '../lib/notifications';
 
 //TODO env
 const PAGE_SIZE: number = 20;
@@ -24,12 +25,21 @@ interface Row {
 
 // TODO column-sorted table https://ui.mantine.dev/component/table-sort
 //TODO hover address to see full
-//TODO loading state
 //TODO errors
 
 export function Swaps() {
     const pagination = usePagination();
     const swapsContext = useRecentSwaps(pagination);
+
+    useEffect(() => {
+        if (swapsContext.error !== undefined) {
+            notifyError(
+                "Swaps Issue",
+                "We're having trouble loading recent swaps. Please refresh in a minute.",
+                swapsContext.error
+            );
+        }
+    }, [swapsContext.error]);
 
     return (
         <>
@@ -57,7 +67,7 @@ export function Swaps() {
                         }</td>
                         <td>{timestampToElapsedString(row.timestamp)}</td>
                     </tr>
-                ))}</tbody>
+                )) ?? <Loader />}</tbody>
             </Table>
             <Pagination
                 page={pagination.page}

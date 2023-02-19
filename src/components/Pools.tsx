@@ -1,9 +1,10 @@
 import { useLazyQuery } from '@apollo/client';
-import { Pagination, Table } from '@mantine/core';
+import { Loader, Pagination, Table } from '@mantine/core';
 import { PoolsDocument, PoolsQuery } from '../graphql/queries/pools.graphql.interface';
 import { useEffect, useMemo } from 'react';
 import { formatUSD } from '../lib/currency';
 import { PaginationContext, usePagination } from '../lib/usePagination';
+import { notifyError } from '../lib/notifications';
 
 //TODO env
 const PAGE_SIZE: number = 20;
@@ -17,10 +18,19 @@ interface Row {
 
 // TODO column-sorted table https://ui.mantine.dev/component/table-sort
 // TODO column tooltips?
-// TODO loading state
 export function Pools() {
     const pagination = usePagination();
-    const topPools = useTopPools(pagination);
+    const topPoolsContext = useTopPools(pagination);
+
+    useEffect(() => {
+        if (topPoolsContext.error !== undefined) {
+            notifyError(
+                "Pools Issue",
+                "We're having trouble loading top pools. Please refresh in a minute.",
+                topPoolsContext.error
+            );
+        }
+    }, [topPoolsContext.error]);
 
     return (
         <>
@@ -32,13 +42,13 @@ export function Pools() {
                         <th>Volume (24hr)</th>
                     </tr>
                 </thead>
-                <tbody>{topPools.data?.map(row => (
+                <tbody>{topPoolsContext.data?.map(row => (
                     <tr key={`${row.token0Symbol}-${row.token1Symbol}`}>
                         <td>{row.token0Symbol} ↔ {row.token1Symbol}</td>
                         <td>{formatUSD(row.totalValueLockedUSD)}</td>
                         <td>{formatUSD(row.volume24HrUSD)}</td>
                     </tr>
-                ))}</tbody>
+                )) ?? <Loader />}</tbody>
             </Table>
             <Pagination
                 page={pagination.page}

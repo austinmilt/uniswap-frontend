@@ -5,6 +5,7 @@ import { ApolloProvider } from '@apollo/client';
 import 'normalize.css/normalize.css';
 import { useApollo } from '../lib/apollo';
 import { MantineProvider } from '@mantine/core';
+import { NotificationsProvider } from '@mantine/notifications';
 
 const App: NextPage<AppProps> = ({ Component, pageProps }) => {
   const apolloClient = useApollo(pageProps);
@@ -18,9 +19,11 @@ const App: NextPage<AppProps> = ({ Component, pageProps }) => {
         colorScheme: 'light',
       }}
     >
-      <ApolloProvider client={apolloClient}>
-        <Component {...pageProps} />
-      </ApolloProvider>
+      <NotificationsProvider>
+        <ApolloProvider client={apolloClient}>
+          <Component {...pageProps} />
+        </ApolloProvider>
+      </NotificationsProvider>
     </MantineProvider>
   );
 };
