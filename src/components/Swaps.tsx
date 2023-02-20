@@ -1,4 +1,4 @@
-import { Loader, LoadingOverlay, Pagination, Stack, Table } from '@mantine/core';
+import { Button, Group, Loader, LoadingOverlay, Pagination, Stack, Table } from '@mantine/core';
 import { Duration } from '../lib/duration';
 import { formatToken, formatUSD } from '../lib/currency';
 import { shortenAddress } from '../lib/address';
@@ -76,11 +76,14 @@ export function Swaps() {
                         </tr>
                     ))}</tbody>
                 </Table>
-                <Pagination
-                    page={pagination.page}
-                    onChange={pagination.set}
-                    total={pagination.maxPage + 1}
-                />
+                <Group>
+                    <Pagination
+                        page={pagination.page}
+                        onChange={pagination.set}
+                        total={pagination.maxPage + 1}
+                    />
+                    <Button onClick={() => swapsContext.refresh()}>⟳</Button>
+                </Group>
             </Stack>)}
         </Stack>
     );
@@ -152,5 +155,5 @@ function transformQueryResults(data: SwapsQuery): Row[] | undefined {
         recipient: swap.recipient,
         // timestamps are in seconds since epoch
         timestamp: new Date(Number.parseInt(swap.timestamp) * 1000)
-    }));
+    })).sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 }

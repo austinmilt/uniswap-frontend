@@ -1,7 +1,7 @@
 import { useLazyQuery } from '@apollo/client';
-import { Pagination, Stack, Table } from '@mantine/core';
+import { Button, Group, Pagination, Stack, Table } from '@mantine/core';
 import { PoolsDocument, PoolsQuery } from '../graphql/queries/pools.graphql.interface';
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { formatUSD } from '../lib/currency';
 import { PaginationContext, usePagination } from '../lib/usePagination';
 import { notifyError } from '../lib/notifications';
@@ -57,11 +57,14 @@ export function Pools() {
                         </tr>
                     ))}</tbody>
                 </Table>
-                <Pagination
-                    page={pagination.page}
-                    onChange={pagination.set}
-                    total={pagination.maxPage + 1}
-                />
+                <Group>
+                    <Pagination
+                        page={pagination.page}
+                        onChange={pagination.set}
+                        total={pagination.maxPage + 1}
+                    />
+                    <Button onClick={() => topPoolsContext.refresh()}>⟳</Button>
+                </Group>
             </Stack>)}
         </Stack>
     );
@@ -104,7 +107,7 @@ function transformQueryResults(data: PoolsQuery): Row[] | undefined {
         token1Symbol: pool.token1.symbol,
         totalValueLockedUSD: Number.parseFloat(pool.totalValueLockedUSD),
         volume24HrUSD: computeVolumeChange(pool.poolDayData)
-    }));
+    })).sort((a, b) => b.totalValueLockedUSD - a.totalValueLockedUSD);
 }
 
 

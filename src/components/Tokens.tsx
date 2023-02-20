@@ -1,4 +1,4 @@
-import { Loader, LoadingOverlay, Pagination, Stack, Table } from '@mantine/core';
+import { Pagination, Stack, Table, createStyles, Text, Group, Button } from '@mantine/core';
 import { useEffect, useMemo } from 'react';
 import { formatUSD } from '../lib/currency';
 import { useLazyQuery } from '@apollo/client';
@@ -15,7 +15,7 @@ const COLUMNS: string[] = [
     "TVL",
     "Price (USD)",
     "Δ Price (USD, 24hr)"
-]
+];
 
 interface Row {
     symbol: string;
@@ -60,11 +60,14 @@ export function Tokens() {
                         </tr>
                     ))}</tbody>
                 </Table>
-                <Pagination
-                    page={pagination.page}
-                    onChange={pagination.set}
-                    total={pagination.maxPage + 1}
-                />
+                <Group>
+                    <Pagination
+                        page={pagination.page}
+                        onChange={pagination.set}
+                        total={pagination.maxPage + 1}
+                    />
+                    <Button onClick={() => topTokensContext.refresh()}>⟳</Button>
+                </Group>
             </Stack>)}
         </Stack>
     );
@@ -72,16 +75,23 @@ export function Tokens() {
 
 
 function PriceDelta(props: { changeUSD: number }): JSX.Element {
+    const { classes } = useStyles();
+
     const changeSymbol: string = useMemo(() => {
         if (props.changeUSD < 0) return "🡮";
         else if (props.changeUSD === 0) return " ";
         else return "🡭";
-    }, [props.changeUSD])
+    }, [props.changeUSD]);
 
-    //TODO change the color based on the direction
-    return <>
+    const styleClass: string | undefined = useMemo(() => {
+        if (props.changeUSD < 0) return classes.priceDeltaDown;
+        else if (props.changeUSD === 0) return undefined;
+        else return classes.priceDeltaUp;
+    }, [props.changeUSD, classes]);
+
+    return <Text className={styleClass}>
         {changeSymbol} {(formatUSD(Math.abs(props.changeUSD)))}
-    </>
+    </Text>
 }
 
 
@@ -124,6 +134,17 @@ function transformQueryResults(data: TokensQuery): Row[] | undefined {
         name: token.name,
         priceUSD: Number.parseFloat(token.tokenDayData[0].priceUSD),
         priceUSDChange24Hr: Number.parseFloat(token.tokenDayData[0].priceUSD) - Number.parseFloat(token.tokenDayData[1].priceUSD),
-        totalValueLockedUSD: token.totalValueLockedUSD
-    }));
+        totalValueLockedUSD: Number.parseFloat(token.totalValueLockedUSD)
+    })).sort((a, b) => b.totalValueLockedUSD - a.totalValueLockedUSD);
 }
+
+
+const useStyles = createStyles((theme) => ({
+    priceDeltaUp: {
+        color: theme.colors.green[5]
+    },
+
+    priceDeltaDown: {
+        color: theme.colors.red[5]
+    }
+}))
