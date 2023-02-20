@@ -1,7 +1,7 @@
 import { useLazyQuery } from '@apollo/client';
 import { Button, Group, Pagination, Stack, Table } from '@mantine/core';
 import { PoolsDocument, PoolsQuery } from '../graphql/queries/pools.graphql.interface';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { formatUSD } from '../lib/currency';
 import { PaginationContext, usePagination } from '../lib/usePagination';
 import { notifyError } from '../lib/notifications';

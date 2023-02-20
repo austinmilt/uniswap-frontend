@@ -1,4 +1,4 @@
-import { Anchor, Button, Group, Loader, LoadingOverlay, Pagination, Stack, Table } from '@mantine/core';
+import { Anchor, Button, Group, Pagination, Stack, Table } from '@mantine/core';
 import { Duration } from '../lib/duration';
 import { formatToken, formatUSD } from '../lib/currency';
 import { shortenAddress } from '../lib/address';
