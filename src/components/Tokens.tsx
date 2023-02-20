@@ -1,14 +1,21 @@
-import { Loader, LoadingOverlay, Pagination, Table } from '@mantine/core';
+import { Pagination, Stack, Table, createStyles, Text, Group, Button } from '@mantine/core';
 import { useEffect, useMemo } from 'react';
 import { formatUSD } from '../lib/currency';
 import { useLazyQuery } from '@apollo/client';
 import { TokensDocument, TokensQuery } from '../graphql/queries/tokens.graphql.interface';
 import { PaginationContext, usePagination } from '../lib/usePagination';
-import { showNotification } from '@mantine/notifications';
 import { notifyError } from '../lib/notifications';
+import { TableSkeleton } from './TableSkeleton';
 
 //TODO env
-const PAGE_SIZE: number = 20;
+const PAGE_SIZE: number = 12;
+
+const COLUMNS: string[] = [
+    "Token",
+    "TVL",
+    "Price (USD)",
+    "Δ Price (USD, 24hr)"
+];
 
 interface Row {
     symbol: string;
@@ -35,16 +42,13 @@ export function Tokens() {
     }, [topTokensContext.error]);
 
     return (
-        <>
-            {topTokensContext.loading && <Loader data-testid="loading" />}
-            {!topTokensContext.loading && (<>
+        <Stack>
+            {topTokensContext.loading && <TableSkeleton columns={COLUMNS} rows={PAGE_SIZE} data-testid="loading" />}
+            {!topTokensContext.loading && (<Stack align='center'>
                 <Table>
                     <thead>
                         <tr>
-                            <th>Token</th>
-                            <th>TVL</th>
-                            <th>Price (USD)</th>
-                            <th>Δ Price (USD, 24hr)</th>
+                            {COLUMNS.map(c => <th key={c}>{c}</th>)}
                         </tr>
                     </thead>
                     <tbody>{topTokensContext.data?.map((row, i) => (
@@ -56,28 +60,38 @@ export function Tokens() {
                         </tr>
                     ))}</tbody>
                 </Table>
-                <Pagination
-                    page={pagination.page}
-                    onChange={pagination.set}
-                    total={pagination.maxPage + 1}
-                />
-            </>)}
-        </>
+                <Group>
+                    <Pagination
+                        page={pagination.page}
+                        onChange={pagination.set}
+                        total={pagination.maxPage + 1}
+                    />
+                    <Button onClick={() => topTokensContext.refresh()}>⟳</Button>
+                </Group>
+            </Stack>)}
+        </Stack>
     );
 }
 
 
 function PriceDelta(props: { changeUSD: number }): JSX.Element {
+    const { classes } = useStyles();
+
     const changeSymbol: string = useMemo(() => {
         if (props.changeUSD < 0) return "🡮";
         else if (props.changeUSD === 0) return " ";
         else return "🡭";
-    }, [props.changeUSD])
+    }, [props.changeUSD]);
 
-    //TODO change the color based on the direction
-    return <>
+    const styleClass: string | undefined = useMemo(() => {
+        if (props.changeUSD < 0) return classes.priceDeltaDown;
+        else if (props.changeUSD === 0) return undefined;
+        else return classes.priceDeltaUp;
+    }, [props.changeUSD, classes]);
+
+    return <Text className={styleClass}>
         {changeSymbol} {(formatUSD(Math.abs(props.changeUSD)))}
-    </>
+    </Text>
 }
 
 
@@ -120,6 +134,17 @@ function transformQueryResults(data: TokensQuery): Row[] | undefined {
         name: token.name,
         priceUSD: Number.parseFloat(token.tokenDayData[0].priceUSD),
         priceUSDChange24Hr: Number.parseFloat(token.tokenDayData[0].priceUSD) - Number.parseFloat(token.tokenDayData[1].priceUSD),
-        totalValueLockedUSD: token.totalValueLockedUSD
-    }));
+        totalValueLockedUSD: Number.parseFloat(token.totalValueLockedUSD)
+    })).sort((a, b) => b.totalValueLockedUSD - a.totalValueLockedUSD);
 }
+
+
+const useStyles = createStyles((theme) => ({
+    priceDeltaUp: {
+        color: theme.colors.green[5]
+    },
+
+    priceDeltaDown: {
+        color: theme.colors.red[5]
+    }
+}))

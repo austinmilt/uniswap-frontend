@@ -15,8 +15,8 @@ const App: NextPage<AppProps> = ({ Component, pageProps }) => {
       withGlobalStyles
       withNormalizeCSS
       theme={{
-        /** Put your mantine theme override here */
-        colorScheme: 'light',
+        colorScheme: 'dark',
+        primaryColor: 'green'
       }}
     >
       <NotificationsProvider>
