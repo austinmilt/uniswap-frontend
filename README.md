@@ -41,9 +41,21 @@ See [package.json](./package.json) for other scripts.
 
 ## Contributing
 Follow a standard development pipeline, i.e.
+
 1. Create a new branch (e.g. `feature/new-swaps`)
 2. Write failing tests that describe the feature.
 3. Implement the feature to make the tests pass.
 4. Create a PR.
 5. Get your PR approved (and pass all tests).
 6. Merge your PR. It will be automatically deployed.
+
+### Updating Graph QL Queries
+If you need to write a new query or adjust an existing one:
+
+1. Create/edit the query in [src/graphql/queries](./src/graphql/queries/).
+2. Run `yarn codegen` to update types.
+3. Use the query like `useQuery(MyQueryDocument)` or `useLazyQuery(MyQueryDocument)`.
+
+See [Apollo Client v3 docs](https://www.apollographql.com/docs/react/data/queries) for more info on using queries.
+
+See [Uniswap v3 graphiql](https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3-subgraph/graphql) for the schema.

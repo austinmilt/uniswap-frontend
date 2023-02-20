@@ -1,7 +1,7 @@
 {
-  "name": "next-advanced-apollo-starter",
+  "name": "uniswap-frontend",
   "version": "1.0.0",
-  "license": "MIT",
+  "license": "GPL v3",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
