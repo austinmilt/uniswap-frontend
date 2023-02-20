@@ -6,7 +6,8 @@ const FORMATTER_NUMBER: Intl.NumberFormat = new Intl.NumberFormat(undefined, {
 const FORMATTER_USD: Intl.NumberFormat = new Intl.NumberFormat(undefined, {
     style: "currency",
     currency: "USD",
-    notation: "compact"
+    notation: "compact",
+    minimumFractionDigits: 2
 })
 
 export function formatUSD(amountUSD: number): string {
