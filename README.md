@@ -1,85 +1,49 @@
 # Uniswap Frontend (Coding Challenge)
-## TODO (README)
-- set up (yarn install)
-- running (yarn dev vs docker, see below)
-- contributing
-  > branches
-  > PRs
-  > tests
-- deploying (merge to main, vercel, dev branch),
+Uniswap is a decentralized cryptocurrency
+exchange that uses a set of smart contracts
+to execute trades on its exchange.
 
-<h1 align="center">
-next-advanced-apollo-starter
-</h1>
+This site gives a minimal view into the status of
+Uniswap v3. It was developed as part of a coding
+challenge and should not be used to inform financial
+decisions.
 
-<h4 align="center">
-  Advanced and minimalistic Next.js and Apollo starter
-</h4>
+## Getting Started
 
-<p align="center">
-  <a href="#whats-included">What's included</a> •
-  <a href="#getting-started">Getting Started</a> •
-  <a href="#apollo-usage">Apollo usage</a> •
-  <a href="#tests">Tests</a> •
-  <a href="#docker-usage">Docker usage</a>
-</p>
+### 1. Clone the repo
+See instructions on GitHub for how to get the repo.
+### 2. Install Dependencies
+You will need the following
+- [Node.js](https://nodejs.org/en/) (built on 18.x) runtime
+- [yarn](https://yarnpkg.com/) dependency manager
 
-## What's included
+You can also get Docker if you want to run this
+in a container, though I developed without. See
+the [template repo I used](https://github.com/nikitowsky/next-advanced-apollo-starter).
 
-### Features
+After you have the above dependencies, open the cloned
+repo in a terminal and run
 
-- Latest [Next.js](https://nextjs.org/) version.
-- Latest packages updates.
-- GraphQL [Apollo](https://www.apollographql.com/docs/react/essentials/get-started/) client with built-in
-  cookie-based [JWT](https://jwt.io/) token authentication.
-- Works both via _Client-Side Rendering_ and _Server-Side Rendering_;
-- [TypeScript](https://www.typescriptlang.org/) environment.
-- [Normalize.css](https://necolas.github.io/normalize.css/) included.
-- _No custom server_.
-
-### Developer experience
-
-- Testing environment via [Jest](https://jestjs.io/)
-  and [@testing-library/react](https://testing-library.com/docs/react-testing-library/intro).
-- Configured [GraphQL Code Generator](https://www.the-guild.dev/graphql/codegen). Simply run `yarn codegen`.
-- [Prettier](https://prettier.io/) for code formatting.
-- Debug configuration for [VSCode](https://code.visualstudio.com/).
-- [Docker](https://www.docker.com/) configuration to serve **production-ready** build with Nginx.
-
-## Getting started
-
-No extra knowledge needed to get started, see [Next.js documentation](https://nextjs.org/docs).
-
-## GraphQL Code Generation
-
-Generated interfaces for co-located _.graphql_ files. See the [example](./src/graphql/queries).
-
-```bash
-yarn codegen
+```
+yarn
 ```
 
-## Apollo usage
+to install dependencies.
 
-- [Client-Side Rendering (CSR) example](./src/pages/users-csr.tsx).
-- [Server-Side Rendering (SSR) example](./src/pages/users-ssr.tsx).
+### 3. Run the Site Locally
+In your terminal, run
 
-## Tests
-
-[Jest](https://jestjs.io/) is a great tool for testing. To run tests simply use `test` script from `package.json`:
-
-```bash
-yarn test
+```
+yarn dev
 ```
 
----
+See [package.json](./package.json) for other scripts.
 
-Pretty much everything you need to know about project structure, SSR, etc., you can find in
-the [official Next.js documentation](https://nextjs.org/docs).
-
-## Docker usage
-
-To build and run Dockerized **production-ready** container, run:
-
-```bash
-docker-compose up --build
-```
+## Contributing
+Follow a standard development pipeline, i.e.
+1. Create a new branch (e.g. `feature/new-swaps`)
+2. Write failing tests that describe the feature.
+3. Implement the feature to make the tests pass.
+4. Create a PR.
+5. Get your PR approved (and pass all tests).
+6. Merge your PR. It will be automatically deployed.
