@@ -12,7 +12,7 @@ const PAGE_SIZE: number = 12;
 
 const COLUMNS: string[] = [
     "Token",
-    "TVL",
+    "TVL (USD)",
     "Price (USD)",
     "Δ Price (USD, 24hr)"
 ];
