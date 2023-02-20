@@ -1,4 +1,4 @@
-import { Button, Group, Loader, LoadingOverlay, Pagination, Stack, Table } from '@mantine/core';
+import { Anchor, Button, Group, Loader, LoadingOverlay, Pagination, Stack, Table } from '@mantine/core';
 import { Duration } from '../lib/duration';
 import { formatToken, formatUSD } from '../lib/currency';
 import { shortenAddress } from '../lib/address';
@@ -67,11 +67,13 @@ export function Swaps() {
                             <td>{formatUSD(row.valueUSD)}</td>
                             <td>{`${formatToken(row.token0Amount)} ${row.token0Symbol}`}</td>
                             <td>{`${formatToken(row.token1Amount)} ${row.token1Symbol}`}</td>
-                            <td>{
-                                (row.sender === row.recipient) ?
-                                    shortenAddress(row.sender) :
-                                    `${shortenAddress(row.sender)} ➝ ${shortenAddress(row.recipient)}`
-                            }</td>
+                            <td>
+                                <Anchor href={`https://etherscan.io/tx/${row.transactionId}`}>
+                                    {(row.sender === row.recipient) ?
+                                        shortenAddress(row.sender) :
+                                        `${shortenAddress(row.sender)} ➝ ${shortenAddress(row.recipient)}`}
+                                </Anchor>
+                            </td>
                             <td>{timestampToElapsedString(row.timestamp)}</td>
                         </tr>
                     ))}</tbody>
