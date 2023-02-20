@@ -12,8 +12,6 @@ query Pools($first: Int = 1, $skip: Int = 0, $orderBy: Pool_orderBy = totalValue
     totalValueLockedUSD
     poolDayData(first: 2, skip: 0, orderBy: date, orderDirection: desc) {
       volumeUSD
-      volumeToken0
-      volumeToken1
     }
   }
 }

@@ -1,5 +1,5 @@
 import { useLazyQuery } from '@apollo/client';
-import { Loader, Pagination, Table } from '@mantine/core';
+import { Loader, LoadingOverlay, Pagination, Table } from '@mantine/core';
 import { PoolsDocument, PoolsQuery } from '../graphql/queries/pools.graphql.interface';
 import { useEffect, useMemo } from 'react';
 import { formatUSD } from '../lib/currency';
@@ -34,27 +34,30 @@ export function Pools() {
 
     return (
         <>
-            <Table>
-                <thead>
-                    <tr>
-                        <th>Pool</th>
-                        <th>TVL (USD)</th>
-                        <th>Volume (24hr)</th>
-                    </tr>
-                </thead>
-                <tbody>{topPoolsContext.data?.map(row => (
-                    <tr key={`${row.token0Symbol}-${row.token1Symbol}`}>
-                        <td>{row.token0Symbol} ↔ {row.token1Symbol}</td>
-                        <td>{formatUSD(row.totalValueLockedUSD)}</td>
-                        <td>{formatUSD(row.volume24HrUSD)}</td>
-                    </tr>
-                )) ?? <Loader />}</tbody>
-            </Table>
-            <Pagination
-                page={pagination.page}
-                onChange={pagination.set}
-                total={pagination.maxPage + 1}
-            />
+            {topPoolsContext.loading && <Loader data-testid="loading" />}
+            {!topPoolsContext.loading && (<>
+                <Table>
+                    <thead>
+                        <tr>
+                            <th>Pool</th>
+                            <th>TVL (USD)</th>
+                            <th>Volume (24hr)</th>
+                        </tr>
+                    </thead>
+                    <tbody>{topPoolsContext.data?.map((row, i) => (
+                        <tr key={`${row.token0Symbol}-${row.token1Symbol}-${i}`}>
+                            <td>{row.token0Symbol} ↔ {row.token1Symbol}</td>
+                            <td>{formatUSD(row.totalValueLockedUSD)}</td>
+                            <td>{formatUSD(row.volume24HrUSD)}</td>
+                        </tr>
+                    ))}</tbody>
+                </Table>
+                <Pagination
+                    page={pagination.page}
+                    onChange={pagination.set}
+                    total={pagination.maxPage + 1}
+                />
+            </>)}
         </>
     );
 }

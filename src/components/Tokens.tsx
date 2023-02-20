@@ -1,4 +1,4 @@
-import { Loader, Pagination, Table } from '@mantine/core';
+import { Loader, LoadingOverlay, Pagination, Table } from '@mantine/core';
 import { useEffect, useMemo } from 'react';
 import { formatUSD } from '../lib/currency';
 import { useLazyQuery } from '@apollo/client';
@@ -36,29 +36,32 @@ export function Tokens() {
 
     return (
         <>
-            <Table>
-                <thead>
-                    <tr>
-                        <th>Token</th>
-                        <th>TVL</th>
-                        <th>Price (USD)</th>
-                        <th>Δ Price (USD, 24hr)</th>
-                    </tr>
-                </thead>
-                <tbody>{topTokensContext.data?.map((row, i) => (
-                    <tr key={`${row.symbol}-${row.name}-${i}`}>
-                        <td>{`${row.name} (${row.symbol})`}</td>
-                        <td>{formatUSD(row.totalValueLockedUSD)}</td>
-                        <td>{formatUSD(row.priceUSD)}</td>
-                        <td><PriceDelta changeUSD={row.priceUSDChange24Hr} /></td>
-                    </tr>
-                )) ?? <Loader />}</tbody>
-            </Table>
-            <Pagination
-                page={pagination.page}
-                onChange={pagination.set}
-                total={pagination.maxPage + 1}
-            />
+            {topTokensContext.loading && <Loader data-testid="loading" />}
+            {!topTokensContext.loading && (<>
+                <Table>
+                    <thead>
+                        <tr>
+                            <th>Token</th>
+                            <th>TVL</th>
+                            <th>Price (USD)</th>
+                            <th>Δ Price (USD, 24hr)</th>
+                        </tr>
+                    </thead>
+                    <tbody>{topTokensContext.data?.map((row, i) => (
+                        <tr key={`${row.symbol}-${row.name}-${i}`}>
+                            <td>{`${row.name} (${row.symbol})`}</td>
+                            <td>{formatUSD(row.totalValueLockedUSD)}</td>
+                            <td>{formatUSD(row.priceUSD)}</td>
+                            <td><PriceDelta changeUSD={row.priceUSDChange24Hr} /></td>
+                        </tr>
+                    ))}</tbody>
+                </Table>
+                <Pagination
+                    page={pagination.page}
+                    onChange={pagination.set}
+                    total={pagination.maxPage + 1}
+                />
+            </>)}
         </>
     );
 }
