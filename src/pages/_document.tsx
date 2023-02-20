@@ -1,8 +1,6 @@
 import { ServerStyles, createStylesServer } from '@mantine/next';
 import Document, { DocumentContext, Head, Html, Main, NextScript } from 'next/document';
 
-// TODO maybe this: https://mantine.dev/theming/emotion-cache/#server-side-rendering-with-custom-cache
-
 const stylesServer = createStylesServer();
 
 export default class _Document extends Document {
