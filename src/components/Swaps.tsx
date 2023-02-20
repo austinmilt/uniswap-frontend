@@ -1,4 +1,4 @@
-import { Loader, Pagination, Table } from '@mantine/core';
+import { Loader, LoadingOverlay, Pagination, Table } from '@mantine/core';
 import { Duration } from '../lib/duration';
 import { formatToken, formatUSD } from '../lib/currency';
 import { shortenAddress } from '../lib/address';
@@ -43,37 +43,40 @@ export function Swaps() {
 
     return (
         <>
-            <Table>
-                <thead>
-                    <tr>
-                        <th>Swap</th>
-                        <th>Value (USD)</th>
-                        <th>Token Amount</th>
-                        <th>Token Amount</th>
-                        <th>Account(s)</th>
-                        <th>When</th>
-                    </tr>
-                </thead>
-                <tbody>{swapsContext.data?.map(row => (
-                    <tr key={row.transactionId}>
-                        <td>{`${row.token0Symbol} ↔ ${row.token1Symbol}`}</td>
-                        <td>{formatUSD(row.valueUSD)}</td>
-                        <td>{`${formatToken(row.token0Amount)} ${row.token0Symbol}`}</td>
-                        <td>{`${formatToken(row.token1Amount)} ${row.token1Symbol}`}</td>
-                        <td>{
-                            (row.sender === row.recipient) ?
-                                shortenAddress(row.sender) :
-                                `${shortenAddress(row.sender)} ➝ ${shortenAddress(row.recipient)}`
-                        }</td>
-                        <td>{timestampToElapsedString(row.timestamp)}</td>
-                    </tr>
-                )) ?? <Loader />}</tbody>
-            </Table>
-            <Pagination
-                page={pagination.page}
-                onChange={pagination.set}
-                total={pagination.maxPage + 1}
-            />
+            {swapsContext.loading && <Loader data-testid="loading" />}
+            {!swapsContext.loading && (<>
+                <Table>
+                    <thead>
+                        <tr>
+                            <th>Swap</th>
+                            <th>Value (USD)</th>
+                            <th>Token Amount</th>
+                            <th>Token Amount</th>
+                            <th>Account(s)</th>
+                            <th>When</th>
+                        </tr>
+                    </thead>
+                    <tbody>{swapsContext.data?.map(row => (
+                        <tr key={row.transactionId}>
+                            <td>{`${row.token0Symbol} ↔ ${row.token1Symbol}`}</td>
+                            <td>{formatUSD(row.valueUSD)}</td>
+                            <td>{`${formatToken(row.token0Amount)} ${row.token0Symbol}`}</td>
+                            <td>{`${formatToken(row.token1Amount)} ${row.token1Symbol}`}</td>
+                            <td>{
+                                (row.sender === row.recipient) ?
+                                    shortenAddress(row.sender) :
+                                    `${shortenAddress(row.sender)} ➝ ${shortenAddress(row.recipient)}`
+                            }</td>
+                            <td>{timestampToElapsedString(row.timestamp)}</td>
+                        </tr>
+                    ))}</tbody>
+                </Table>
+                <Pagination
+                    page={pagination.page}
+                    onChange={pagination.set}
+                    total={pagination.maxPage + 1}
+                />
+            </>)}
         </>
     );
 }

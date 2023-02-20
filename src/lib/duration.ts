@@ -1,3 +1,6 @@
+/**
+ * Stolen from myself from other projects.
+ */
 
 export const HOURS_PER_DAY: number = 24.0;
 export const MINUTES_PER_HOUR: number = 60.0;
