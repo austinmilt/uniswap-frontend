@@ -1,13 +1,20 @@
 import { useLazyQuery } from '@apollo/client';
-import { Loader, LoadingOverlay, Pagination, Table } from '@mantine/core';
+import { Pagination, Stack, Table } from '@mantine/core';
 import { PoolsDocument, PoolsQuery } from '../graphql/queries/pools.graphql.interface';
 import { useEffect, useMemo } from 'react';
 import { formatUSD } from '../lib/currency';
 import { PaginationContext, usePagination } from '../lib/usePagination';
 import { notifyError } from '../lib/notifications';
+import { TableSkeleton } from './TableSkeleton';
 
 //TODO env
-const PAGE_SIZE: number = 20;
+const PAGE_SIZE: number = 12;
+
+const COLUMNS: string[] = [
+    "Pool",
+    "TVL (USD)",
+    "Volume (24hr)"
+]
 
 interface Row {
     token0Symbol: string;
@@ -33,15 +40,13 @@ export function Pools() {
     }, [topPoolsContext.error]);
 
     return (
-        <>
-            {topPoolsContext.loading && <Loader data-testid="loading" />}
-            {!topPoolsContext.loading && (<>
+        <Stack>
+            {topPoolsContext.loading && <TableSkeleton columns={COLUMNS} rows={PAGE_SIZE} data-testid="loading" />}
+            {!topPoolsContext.loading && (<Stack align='center'>
                 <Table>
                     <thead>
                         <tr>
-                            <th>Pool</th>
-                            <th>TVL (USD)</th>
-                            <th>Volume (24hr)</th>
+                            {COLUMNS.map(c => <th key={c}>{c}</th>)}
                         </tr>
                     </thead>
                     <tbody>{topPoolsContext.data?.map((row, i) => (
@@ -57,8 +62,8 @@ export function Pools() {
                     onChange={pagination.set}
                     total={pagination.maxPage + 1}
                 />
-            </>)}
-        </>
+            </Stack>)}
+        </Stack>
     );
 }
 

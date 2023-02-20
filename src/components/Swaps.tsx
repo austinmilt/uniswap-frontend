@@ -1,4 +1,4 @@
-import { Loader, LoadingOverlay, Pagination, Table } from '@mantine/core';
+import { Loader, LoadingOverlay, Pagination, Stack, Table } from '@mantine/core';
 import { Duration } from '../lib/duration';
 import { formatToken, formatUSD } from '../lib/currency';
 import { shortenAddress } from '../lib/address';
@@ -7,9 +7,19 @@ import { SwapsDocument, SwapsQuery } from '../graphql/queries/swaps.graphql.inte
 import { useEffect, useMemo } from 'react';
 import { PaginationContext, usePagination } from '../lib/usePagination';
 import { notifyError } from '../lib/notifications';
+import { TableSkeleton } from './TableSkeleton';
 
 //TODO env
-const PAGE_SIZE: number = 20;
+const PAGE_SIZE: number = 12;
+
+const COLUMNS: string[] = [
+    "Swap",
+    "Value (USD)",
+    "Token Amount",
+    "Token Amount",
+    "Account(s)",
+    "When"
+]
 
 interface Row {
     transactionId: string;
@@ -42,18 +52,13 @@ export function Swaps() {
     }, [swapsContext.error]);
 
     return (
-        <>
-            {swapsContext.loading && <Loader data-testid="loading" />}
-            {!swapsContext.loading && (<>
+        <Stack>
+            {swapsContext.loading && <TableSkeleton columns={COLUMNS} rows={PAGE_SIZE} data-testid="loading" />}
+            {!swapsContext.loading && (<Stack align='center'>
                 <Table>
                     <thead>
                         <tr>
-                            <th>Swap</th>
-                            <th>Value (USD)</th>
-                            <th>Token Amount</th>
-                            <th>Token Amount</th>
-                            <th>Account(s)</th>
-                            <th>When</th>
+                            {COLUMNS.map(c => <th key={c}>{c}</th>)}
                         </tr>
                     </thead>
                     <tbody>{swapsContext.data?.map(row => (
@@ -76,8 +81,8 @@ export function Swaps() {
                     onChange={pagination.set}
                     total={pagination.maxPage + 1}
                 />
-            </>)}
-        </>
+            </Stack>)}
+        </Stack>
     );
 }
 

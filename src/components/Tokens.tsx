@@ -1,14 +1,21 @@
-import { Loader, LoadingOverlay, Pagination, Table } from '@mantine/core';
+import { Loader, LoadingOverlay, Pagination, Stack, Table } from '@mantine/core';
 import { useEffect, useMemo } from 'react';
 import { formatUSD } from '../lib/currency';
 import { useLazyQuery } from '@apollo/client';
 import { TokensDocument, TokensQuery } from '../graphql/queries/tokens.graphql.interface';
 import { PaginationContext, usePagination } from '../lib/usePagination';
-import { showNotification } from '@mantine/notifications';
 import { notifyError } from '../lib/notifications';
+import { TableSkeleton } from './TableSkeleton';
 
 //TODO env
-const PAGE_SIZE: number = 20;
+const PAGE_SIZE: number = 12;
+
+const COLUMNS: string[] = [
+    "Token",
+    "TVL",
+    "Price (USD)",
+    "Δ Price (USD, 24hr)"
+]
 
 interface Row {
     symbol: string;
@@ -35,16 +42,13 @@ export function Tokens() {
     }, [topTokensContext.error]);
 
     return (
-        <>
-            {topTokensContext.loading && <Loader data-testid="loading" />}
-            {!topTokensContext.loading && (<>
+        <Stack>
+            {topTokensContext.loading && <TableSkeleton columns={COLUMNS} rows={PAGE_SIZE} data-testid="loading" />}
+            {!topTokensContext.loading && (<Stack align='center'>
                 <Table>
                     <thead>
                         <tr>
-                            <th>Token</th>
-                            <th>TVL</th>
-                            <th>Price (USD)</th>
-                            <th>Δ Price (USD, 24hr)</th>
+                            {COLUMNS.map(c => <th key={c}>{c}</th>)}
                         </tr>
                     </thead>
                     <tbody>{topTokensContext.data?.map((row, i) => (
@@ -61,8 +65,8 @@ export function Tokens() {
                     onChange={pagination.set}
                     total={pagination.maxPage + 1}
                 />
-            </>)}
-        </>
+            </Stack>)}
+        </Stack>
     );
 }
 
