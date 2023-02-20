@@ -106,8 +106,7 @@ function useTopTokens(pagination: PaginationContext): UseRecentTokensContext {
 
     return {
         loading: context.loading,
-        error: new Error("fuck"),
-        // error: context.error,
+        error: context.error,
         data: data,
         refresh: context.refetch,
     }

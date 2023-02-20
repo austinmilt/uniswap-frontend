@@ -1,35 +1,33 @@
 import { render, screen } from '@testing-library/react';
 import { MockedProvider } from '@apollo/client/testing';
-import { PoolsDocument } from '../graphql/queries/pools.graphql.interface';
-import { Pools } from './Pools';
+import { Duration } from '../lib/duration';
+import { Tokens } from './Tokens';
+import { TokensDocument } from '../graphql/queries/tokens.graphql.interface';
 
 //TODO randomly generated data
 const MOCKS = [
     {
         request: {
-            query: PoolsDocument,
+            query: TokensDocument,
             variables: { first: 20, skip: 0, orderBy: "totalValueLockedUSD", orderDirection: "desc" }
         },
         result: {
             data: {
-                pools: [
+                tokens: [
                     {
                         id: '1',
-                        token0: {
-                            symbol: "HEY",
-                            name: "Hey Arnold"
-                        },
-                        token1: {
-                            symbol: "ROCCO",
-                            name: "ROCCO's Modern Life"
-                        },
-                        totalValueLockedUSD: "383983.20930982",
-                        poolDayData: [
+                        name: "Rugrats",
+                        symbol: "RRAT",
+                        totalValueLocked: "1234.09389",
+                        totalValueLockedUSD: "92230.293029",
+                        tokenDayData: [
                             {
-                                volumeUSD: "9820.222",
+                                priceUSD: "23.223",
+                                date: Math.floor(new Date().getTime() / 1000)
                             },
                             {
-                                volumeUSD: "9821.222",
+                                priceUSD: "22.223",
+                                date: Math.floor((new Date().getTime() - Duration.ofDays(1).asMilliseconds()) / 1000)
                             },
                         ]
                     },
@@ -39,19 +37,19 @@ const MOCKS = [
     },
 ];
 
-describe('Top Pools', () => {
-    it('render - includes pools with correct names', async () => {
+describe('Top TOkens', () => {
+    it('render - includes tokens with correct names', async () => {
         render(
             <MockedProvider mocks={MOCKS} addTypename={false}>
-                <Pools />
+                <Tokens />
             </MockedProvider>,
         );
 
         expect(await screen.findByTestId("loading")).toBeInTheDocument();
-        expect(await screen.findByText('HEY ↔ ROCCO')).toBeInTheDocument();
+        expect(await screen.findByText('Rugrats (RRAT)')).toBeInTheDocument();
     });
 
-    it.skip('render - rows are sorted by TVL descending', async () => {
+    it.skip('render - rows are sorted by most recent timestamp', async () => {
         fail("TODO");
     });
 
@@ -64,6 +62,10 @@ describe('Top Pools', () => {
     });
 
     it.skip('render - refresh - refreshes with new data', async () => {
+        fail("TODO");
+    });
+
+    it.skip('render - calculates price change correctly', async () => {
         fail("TODO");
     });
 });
