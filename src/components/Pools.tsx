@@ -43,7 +43,7 @@ export function Pools() {
         <Stack>
             {topPoolsContext.loading && <TableSkeleton columns={COLUMNS} rows={PAGE_SIZE} data-testid="loading" />}
             {!topPoolsContext.loading && (<Stack align='center'>
-                <Table>
+                <Table striped>
                     <thead>
                         <tr>
                             {COLUMNS.map(c => <th key={c}>{c}</th>)}

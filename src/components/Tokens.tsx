@@ -45,7 +45,7 @@ export function Tokens() {
         <Stack>
             {topTokensContext.loading && <TableSkeleton columns={COLUMNS} rows={PAGE_SIZE} data-testid="loading" />}
             {!topTokensContext.loading && (<Stack align='center'>
-                <Table>
+                <Table striped>
                     <thead>
                         <tr>
                             {COLUMNS.map(c => <th key={c}>{c}</th>)}

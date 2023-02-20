@@ -55,7 +55,7 @@ export function Swaps() {
         <Stack>
             {swapsContext.loading && <TableSkeleton columns={COLUMNS} rows={PAGE_SIZE} data-testid="loading" />}
             {!swapsContext.loading && (<Stack align='center'>
-                <Table>
+                <Table striped>
                     <thead>
                         <tr>
                             {COLUMNS.map(c => <th key={c}>{c}</th>)}
